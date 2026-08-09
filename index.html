@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 BILLION PERCENT — What If Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap');
+
+  :root {
+    --bg: #030503;
+    --bg-panel: #0a0f0a;
+    --green: #39ff6a;
+    --green-dim: #1f8f3d;
+    --green-faint: #0f4d21;
+    --amber: #ffcc33;
+    --crack: #072b11;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ambient stone-crackle background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, var(--crack) 0%, transparent 6%),
+      radial-gradient(circle at 85% 15%, var(--crack) 0%, transparent 5%),
+      radial-gradient(circle at 70% 80%, var(--crack) 0%, transparent 7%),
+      radial-gradient(circle at 30% 70%, var(--crack) 0%, transparent 5%),
+      radial-gradient(circle at 50% 50%, #000 0%, #030503 80%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(57,255,106,0.02) 0px,
+      rgba(57,255,106,0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .scanline {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: linear-gradient(rgba(57,255,106,0) 0%, rgba(57,255,106,0.03) 50%, rgba(57,255,106,0) 100%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    opacity: 0.5;
+  }
+
+  @keyframes scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 5;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--green-dim);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(32px, 7vw, 56px);
+    margin: 0;
+    letter-spacing: 2px;
+    color: var(--green);
+    text-shadow: 0 0 8px rgba(57,255,106,0.6), 0 0 28px rgba(57,255,106,0.25);
+    line-height: 1.1;
+  }
+
+  h1 span {
+    color: var(--amber);
+    text-shadow: 0 0 8px rgba(255,204,51,0.6);
+  }
+
+  .subtitle {
+    margin-top: 14px;
+    color: var(--green-dim);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .formula {
+    text-align: center;
+    margin: 22px 0 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--green-faint);
+    letter-spacing: 3px;
+    border-top: 1px solid var(--green-faint);
+    border-bottom: 1px solid var(--green-faint);
+    padding: 10px 0;
+  }
+
+  .console {
+    background: var(--bg-panel);
+    border: 1px solid var(--green-dim);
+    box-shadow: 0 0 0 1px #000, 0 0 30px rgba(57,255,106,0.08), inset 0 0 40px rgba(0,0,0,0.6);
+    padding: 28px;
+    position: relative;
+  }
+
+  .console::before {
+    content: 'REVIVAL PROTOCOL // SCENARIO INPUT';
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--bg);
+    padding: 0 10px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .prompt-label {
+    color: var(--amber);
+    align-self: center;
+    font-weight: bold;
+    font-size: 16px;
+    user-select: none;
+  }
+
+  #scenario-input {
+    flex: 1;
+    background: #010401;
+    border: 1px solid var(--green-faint);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px;
+    padding: 14px 16px;
+    outline: none;
+    caret-color: var(--amber);
+  }
+
+  #scenario-input::placeholder {
+    color: var(--green-faint);
+  }
+
+  #scenario-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 10px rgba(57,255,106,0.35);
+  }
+
+  #run-btn {
+    background: var(--green-faint);
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 13px;
+    padding: 0 26px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  #run-btn:hover:not(:disabled) {
+    background: var(--green);
+    color: #021005;
+    box-shadow: 0 0 18px rgba(57,255,106,0.6);
+  }
+
+  #run-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .examples {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font-size: 11px;
+    color: var(--green-dim);
+    border: 1px solid var(--green-faint);
+    padding: 6px 12px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
+  }
+
+  .chip:hover {
+    color: var(--green);
+    border-color: var(--green);
+    background: rgba(57,255,106,0.06);
+  }
+
+  /* Output */
+  #output-zone {
+    margin-top: 36px;
+  }
+
+  .result {
+    border: 1px solid var(--green-dim);
+    background: var(--bg-panel);
+    padding: 0;
+    position: relative;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+    animation: crystallize 0.6s ease-out;
+  }
+
+  @keyframes crystallize {
+    0% { opacity: 0; transform: scale(0.98); filter: brightness(2); }
+    100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+  }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--green-faint);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--amber);
+  }
+
+  .result-body {
+    padding: 24px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #b9ffce;
+    white-space: pre-wrap;
+  }
+
+  .result-body strong {
+    color: var(--green);
+    text-shadow: 0 0 6px rgba(57,255,106,0.5);
+  }
+
+  .percent-bar {
+    padding: 16px 24px 22px;
+    border-top: 1px dashed var(--green-faint);
+  }
+
+  .percent-label {
+    font-size: 11px;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .bar-track {
+    height: 10px;
+    background: #051005;
+    border: 1px solid var(--green-faint);
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dim), var(--green));
+    width: 0%;
+    transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px rgba(57,255,106,0.7);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--green-dim);
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  .loading .dots::after {
+    content: '';
+    animation: dots 1.4s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+  }
+
+  .error {
+    border: 1px solid #ff4444;
+    color: #ff8888;
+    padding: 16px 20px;
+    font-size: 13px;
+    background: rgba(255,0,0,0.05);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    font-size: 11px;
+    color: var(--green-faint);
+    letter-spacing: 2px;
+  }
+
+  @media (max-width: 560px) {
+    .input-row { flex-direction: column; }
+    .prompt-label { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scanline, .result { animation: none; }
+    .bar-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">SCIENCE KINGDOM // HYPOTHESIS ENGINE</div>
+    <h1>WHAT IF<span>?!</span></h1>
+    <div class="subtitle">"That's amazing!" — a scientific simulator for questions reality never answered.</div>
+  </header>
+
+  <div class="formula">10,000,000,000% SPECULATIVE &nbsp;•&nbsp; STONE-CONFIRMED LOGIC &nbsp;•&nbsp; ZERO MAGIC</div>
+
+  <div class="console">
+    <div class="input-row">
+      <span class="prompt-label">&gt;</span>
+      <input type="text" id="scenario-input" placeholder="What if Earth stopped rotating?" autocomplete="off" />
+      <button id="run-btn">RUN SIMULATION</button>
+    </div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div id="output-zone"></div>
+
+  <footer>PETRIFICATION LEVEL: NOMINAL &nbsp;—&nbsp; LAB STATUS: ONLINE</footer>
+</div>
+
+<script>
+  const examples = [
+    "What if Earth stopped rotating?",
+    "What if the moon disappeared?",
+    "What if humans could photosynthesize?",
+    "What if gravity was twice as strong?",
+    "What if the internet had never been invented?",
+    "What if oceans were freshwater?"
+  ];
+
+  const examplesEl = document.getElementById('examples');
+  examples.forEach(ex => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = ex;
+    chip.onclick = () => {
+      document.getElementById('scenario-input').value = ex;
+      runSimulation();
+    };
+    examplesEl.appendChild(chip);
+  });
+
+  const input = document.getElementById('scenario-input');
+  const btn = document.getElementById('run-btn');
+  const outputZone = document.getElementById('output-zone');
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runSimulation();
+  });
+  btn.addEventListener('click', runSimulation);
+
+  async function runSimulation() {
+    const scenario = input.value.trim();
+    if (!scenario) {
+      input.focus();
+      input.style.borderColor = '#ff4444';
+      setTimeout(() => input.style.borderColor = '', 600);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'ANALYZING...';
+    outputZone.innerHTML = `
+      <div class="loading">
+        RUNNING HYPOTHESIS THROUGH THE SCIENCE KINGDOM<span class="dots"></span>
+      </div>
+    `;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `You are a "What If" scenario simulator styled after the enthusiastic scientific voice of Senku Ishigami from Dr. Stone. Given the hypothetical scenario below, respond ONLY with a JSON object (no markdown fences, no preamble) with these exact fields:
+{
+  "title": "a short punchy restatement of the scenario, 6 words max",
+  "explanation": "3-4 short paragraphs (separated by \\n\\n) explaining what would actually happen, grounded in real science where possible, written with confident, excited, slightly cocky scientific narration in Senku's voice — can use phrases like 'get excited' or reference logic/data, but keep it substantive and informative, not just catchphrases",
+  "plausibility": a number 0-100 representing how scientifically plausible/well-established the reasoning is (not whether the scenario itself is likely, but how confident we can be in the explanation),
+  "plausibility_label": "a short 2-4 word label for that score, e.g. 'Rock Solid Physics' or 'Speculative Territory'"
+}
+
+Scenario: "${scenario}"`
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      const data = await response.json();
+      const text = data.content.map(b => b.text || "").join("").trim();
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+
+      renderResult(parsed);
+    } catch (err) {
+      console.error(err);
+      outputZone.innerHTML = `
+        <div class="error">
+          SIMULATION FAILED. The hypothesis engine hit an error — try rephrasing the scenario or run it again.
+        </div>
+      `;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'RUN SIMULATION';
+    }
+  }
+
+  function renderResult(data) {
+    const paragraphs = (data.explanation || "")
+      .split(/\n\n+/)
+      .map(p => `<p style="margin:0 0 16px;">${escapeHtml(p)}</p>`)
+      .join("");
+
+    outputZone.innerHTML = `
+      <div class="result">
+        <div class="result-header">
+          <span>◆ ${escapeHtml(data.title || "RESULT")}</span>
+          <span>LOG_${String(Math.floor(Math.random()*900+100))}</span>
+        </div>
+        <div class="result-body">${paragraphs}</div>
+        <div class="percent-bar">
+          <div class="percent-label">SCIENTIFIC CONFIDENCE: ${data.plausibility}% — ${escapeHtml(data.plausibility_label || "")}</div>
+          <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+        </div>
+      </div>
+    `;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const fill = document.getElementById('bar-fill');
+        if (fill) fill.style.width = Math.max(2, Math.min(100, data.plausibility)) + '%';
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>

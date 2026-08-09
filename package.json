@@ -1,0 +1,9 @@
+{
+  "name": "whatif-simulator",
+  "version": "1.0.0",
+  "description": "What If Simulator - Dr. Stone themed, with live Google Search grounding via Gemini",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
